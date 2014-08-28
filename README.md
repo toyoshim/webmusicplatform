@@ -17,9 +17,6 @@ This platform manages connection between each **"Custom Element Node"** (both Au
 ## Demo
 [Web Music Platfrom](http://yamaha-webmusic.github.io/webmusicplatform/)  
 
-## Document
-[Japanese](https://yamaha-webmusic.github.io/webmusicplatform/app/components/wm-skelton/)  
-
 ##  Concept
 Basic concept is almost same as [Web Audio Playground](http://webaudioplayground.appspot.com/) by Chris Wilson.  
 Difference is Web Music Platfrom is supporting...
@@ -27,16 +24,24 @@ Difference is Web Music Platfrom is supporting...
  - supports MIDI(input/output)
  - applied Web Components and Polymer
 
+## Instructions for Users & Developers
+### Users' instruction
+ - [Tutorial](https://docs.google.com/document/d/1HyhPZdjDEGgbCCvprlfWsQ8ZCgcbZoR3HEmACrWyEJg/edit): Play audio file and display its waveform on oscilloscope.  
+
+### Developers' instruction
+ - [Tutorial](https://docs.google.com/document/d/13UAp3MAUnVQUoS7H-cYRWHM-j2gYq03HaL3eIuq6H7w/edit): Develop gain node and regist to the platform.
+ ([Completed file](https://yamaha-webmusic.github.io/webmusicplatform/app/components/wm-tutorial/wm-tutorial00.html))
+ - [Skelton template](https://yamaha-webmusic.github.io/webmusicplatform/app/components/wm-skelton/wm-skelton_template.html)
+ - [API Document (Japanese)](https://yamaha-webmusic.github.io/webmusicplatform/app/components/wm-skelton/)
 
 ## Requirement
  - Web Server
  - Web Audio/MIDI readied Web Browser(e.g. [Google Chrome](https://www.google.co.jp/chrome/) )
 
-
-## Usage
+## Setup Web Music Platform on your environment
 1. Pull the repository
 2. Copy them into your Web Server directory
-3. Access the URL where you copied them
+3. Access the URL where you copied them  
 
 ## Contribution
 **TBA**
