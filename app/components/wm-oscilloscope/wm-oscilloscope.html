@@ -10,7 +10,7 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
       position:relative; // change conector's z-index to outerline, element, connector
       float:left; 
       margin:0px; 
-      padding:10px; 
+      padding:30px 10px 10px 10px; 
       background-color:#ffffff; 
       border-radius:0px;
       border:0px solid #dddddd; 
@@ -21,11 +21,33 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
     }
     </style>
     <div class="outerline">
-      <div><paper-slider id="sizeChange" min="1" max="5" value="1" step="0.2" class="sizeChange-input"></paper-slider></div>
       <div id="banalyser" class="banalyser">
         <canvas id="analyser" class="a-canvas"></canvas>
       </div>
     </div>
+
+    <div id="config_panel">
+      <style type="text/css">
+      h2.title {
+        padding: 10px 0px 5px 0px;
+        margin: 0px;
+      }
+      .sizeChange {
+        marign:0px;
+        padding:0px 20px 0px 20px;
+      }
+      .sizeChange-input {
+        width:340px;
+      }
+      </style>
+      <div class="sizeChange">
+        <div style="height:15px;"></div>
+        <h2 class="title">Change Size</h2>
+        <paper-slider id="sizeChange" min="1" max="5" value="1" step="0.2" class="sizeChange-input"></paper-slider>
+      </div>
+      <div style="height:15px;"></div>
+
+
   </template>
   <script type="text/javascript">
   Polymer('wm-oscilloscope', {
@@ -126,7 +148,7 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
           this.ce.cc.stroke();
           this.ce.cc.fill();
           // initialize draw line
-          this.ce.cc.strokeStyle="rgba(230, 230, 230, 1)";
+          this.ce.cc.strokeStyle="rgba(118, 255, 3, 0.8)";
           this.ce.cc.closePath();
 
           this.ce.cc.beginPath();
