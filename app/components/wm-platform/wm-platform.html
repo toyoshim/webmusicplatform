@@ -173,10 +173,27 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
               navigator.requestMIDIAccess({sysex:true}).then(scb.bind(this), ecb.bind(this));
               var self=this;
               function scb(access) {
+                  var inputs;
+                  var outputs;
+                  if (typeof access.inputs === "function") {
+                      inputs = access.inputs();
+                      outputs = access.outputs();
+                  } else {
+                      var inputIterator = access.inputs.values();
+                      inputs = [];
+                      for (var o = inputIterator.next(); !o.done; o = inputIterator.next()) {
+                          inputs.push(o.value)
+                      }
+                      var outputIterator = access.outputs.values();
+                      outputs = [];
+                      for (var o = outputIterator.next(); !o.done; o = outputIterator.next()) {
+                          outputs.push(o.value)
+                      }
+                  }
                   self.midi={
                       "access": access,
-                      "inputs": access.inputs(),
-                      "outputs": access.outputs()
+                      "inputs": inputs,
+                      "outputs": outputs
                   }
                   midi=self.midi;
               }
