@@ -40,9 +40,11 @@ Difference is Web Music Platfrom is supporting...
  - Web Audio/MIDI readied Web Browser(e.g. [Google Chrome](https://www.google.co.jp/chrome/) )
 
 ## Setup Web Music Platform on your environment
-1. Pull the repository
-2. Copy them into your Web Server directory
-3. Access the URL where you copied them  
+1. $ npm -g install bower
+2. $ git clone https://github.com/yamaha-webmusic/webmusicplatform.git
+3. $ cd webmusicplatform && bower install
+4. Copy them into your Web Server directory
+5. Access the URL where you copied them
 
 ## Contribution
 **TBA**
