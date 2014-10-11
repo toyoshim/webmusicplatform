@@ -17,7 +17,7 @@
     "polymer": "Polymer/polymer#~0.3.4",
     "paper-elements": "Polymer/paper-elements#~0.3.4",
     "core-elements": "Polymer/core-elements#~0.3.4",
-    "webaudio-controls": "*"
+    "webaudio-controls": "054162983b182f15a7a477177278701bea49580f"
   },
   "resolutions": {
     "polymer": "~0.3.4",
