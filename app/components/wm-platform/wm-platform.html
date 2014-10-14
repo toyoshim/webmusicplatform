@@ -169,6 +169,7 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
                     undefined;
 
           audioContext=this.ac;
+          midi={};
           if(navigator.requestMIDIAccess) {
               navigator.requestMIDIAccess({sysex:true}).then(scb.bind(this), ecb.bind(this));
               var self=this;
@@ -194,7 +195,7 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
                       "access": access,
                       "inputs": inputs,
                       "outputs": outputs
-                  }
+                  };
                   midi=self.midi;
               }
               function ecb(msg){
