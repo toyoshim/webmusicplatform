@@ -340,7 +340,7 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
 
           if(manifest.node_type.input) {
               // connect component: input
-              ctri.addEventListener("pointerdown", function(event){
+              ctri.addEventListener("trackstart", function(event){
                   self.startDraggingConnector.bind(self)(event);
               }, true);
           } else {
@@ -372,7 +372,7 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
           
           if(manifest.node_type.output) {
               // connect component: output
-              ctro.addEventListener("pointerdown", function(event){
+              ctro.addEventListener("trackstart", function(event){
                   self.startDraggingConnector.bind(self)(event);
               }, true);
           } else {
@@ -504,8 +504,8 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
           var self=this;
 
           // drag component
-          //divC.addEventListener("pointerdown", function(event){
-          divP.addEventListener("pointerdown", function(event){
+          //divC.addEventListener("trackstart", function(event){
+          divP.addEventListener("trackstart", function(event){
               //console.log("[divP event] ", event);
               self.startDraggingNode.bind(self)(event);
           }, true);
@@ -877,9 +877,8 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
 
           // add eventListener
           var self=this;
-          document.addEventListener('pointermove', whileDraggingNode, true );
-          document.addEventListener('pointerup',  stopDraggingNode, true );
-          document.addEventListener('pointerleave', stopDraggingNode, true );
+          document.addEventListener('track', whileDraggingNode, true );
+          document.addEventListener('trackend',  stopDraggingNode, true );
 
           function whileDraggingNode(event) {
               var x, y;
@@ -957,9 +956,8 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
               event.preventDefault();
           }
           function stopDraggingNode(event) {
-              document.removeEventListener('pointermove', whileDraggingNode, true );
-              document.removeEventListener('pointerup',  stopDraggingNode, true );
-              document.removeEventListener('pointerleave', stopDraggingNode, true );
+              document.removeEventListener('track', whileDraggingNode, true );
+              document.removeEventListener('trackend',  stopDraggingNode, true );
 
               event.preventDefault();
           }
@@ -1042,9 +1040,8 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
 
           // add eventListener
           var self=this;
-          document.addEventListener('pointermove', whileDraggingConnector, true );
-          document.addEventListener('pointerup',  stopDraggingConnector, true );
-          document.addEventListener('pointerleave', stopDraggingConnector, true );
+          document.addEventListener('track', whileDraggingConnector, true );
+          document.addEventListener('trackend',  stopDraggingConnector, true );
 
           event.preventDefault();
 	        event.stopPropagation();
@@ -1100,9 +1097,8 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
               
           }
           function stopDraggingConnector(event) {
-              document.removeEventListener('pointermove', whileDraggingConnector, true );
-              document.removeEventListener('pointerup',  stopDraggingConnector, true );
-              document.removeEventListener('pointerleave', stopDraggingConnector, true );
+              document.removeEventListener('track', whileDraggingConnector, true );
+              document.removeEventListener('trackend', stopDraggingConnector, true );
               event.preventDefault();
 
 	            if (self.dragObj.lastLit) {
@@ -1112,7 +1108,7 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
 
 	            self.dragObj.elNode.className = self.dragObj.elNode.unlitClassname;
 
-	            var toElem = event.toElement || event.target;
+	            var toElem = event.relatedTarget;
 
               // connect only same type(webaudio to webaudio, webmidi to webmidi)
               var cc=true;
