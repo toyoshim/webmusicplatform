@@ -18,7 +18,9 @@
     "polymer-gestures": "Polymer/polymer-gestures#~0.4.2",
     "paper-elements": "Polymer/paper-elements#~0.4.2",
     "core-elements": "Polymer/core-elements#~0.4.2",
-    "leapjs": "leapmotion/leapjs#0.6.1"
+    "leapjs": "leapmotion/leapjs#0.6.1",
+    "wm-specticle": "toyoshim/wm-specticle#~0.1.0",
+    "wm-morphere": "toyoshim/wm-morphere#0.1.0"
   },
   "resolutions": {
     "platform": "^0.4.0",
