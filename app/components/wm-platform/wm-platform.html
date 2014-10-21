@@ -391,6 +391,10 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
               var pib=document.createElement("paper-icon-button");
               pib.icon="more-vert";
               pib.className="fill menu-config";
+              // not sure how to put style inside shdow dom
+              pib.style.setProperty("padding", "0px 0px 0px 0px");
+              pib.style.setProperty("margin", "-2px 0px 0px -3px");
+
 
               var mdivbd=document.createElement("div");
               mdivbd.className="config-body";
