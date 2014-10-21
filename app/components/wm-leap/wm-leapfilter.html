@@ -1,0 +1,195 @@
+<!--
+Copyright (c) 2014 Yamaha Corporation. All rights reserved.
+Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
+-->
+<link rel="import" href="../wm-platform/wm-resourcemanager.html">
+<polymer-element name="wm-leapfilter" extends="wm-resourcemanager" attributes="">
+  <template>
+    <link rel="stylesheet" href="../../css/reset.css">
+    <link rel="stylesheet" href="../../css/elements.css">
+    <style type="text/css">
+      .outerline {
+        position:relative; // change conector's z-index to outerline, element, connector
+        float:left; 
+        margin:0px; 
+        padding:10px; 
+        background-color:#ffffff; 
+        border-radius:0px; 
+        border:0px solid #dddddd; 
+      }
+      .monitor {
+        position:absolute; 
+        left:10px; 
+        width:190px; 
+        color: #8080aa; 
+        text-align: right; 
+      }
+      .monitor#freq {
+        top:80px; 
+      }
+      .monitor#qvalue {
+        top:100px; 
+      }
+    </style>
+    <div class="outerline">
+      <canvas id="bkgrnd-canvas" width="200" height="120">
+      </canvas>
+      <div id="freq"   class="monitor"></div>
+      <div id="qvalue" class="monitor"></div>
+    </div>
+  </template>
+  <script type="text/javascript" src="../../../bower_components/leapjs/leap-0.6.1.min.js"></script>
+  <script type="text/javascript">
+  Polymer('wm-leapfilter', {
+      // own properties
+      _filterNode: null,
+      _handId: -1,
+      _fingerId: -1,
+      _minFreq: 20,
+      _maxFreq: 20000,
+      _minQ: 0,
+      _maxQ: 50,
+      
+      // polymer methods
+      ready: function() {
+          this.hello();
+          var self=this;
+          
+          var controllerOptions = {enableGestures: true};
+          Leap.loop(controllerOptions, function(frame) {
+              
+              // 
+              var procGestures = function(gestures) {
+                  for (var i = 0; i < gestures.length; i++) {
+                      var gesture = frame.gestures[i];
+                      if ("circle" == gesture.type) {
+                         // reset panner
+                          self.resetParam();
+                          self._handId = -1;
+                          self._fingerId = -1;
+                          return true;
+                      }
+                  } //for(i)
+                  return false;
+              };
+              
+              // 
+              var procFingers = function(fingers) {
+                  if(0 >= fingers.length) {
+                      self._handId = -1;
+                      self._fingerId = -1;
+                      return;
+                  }
+                  
+                  if (0 > self._fingerId) {
+                      for (var i = 0; i < fingers.length; i++) {
+                          var finger = fingers[i];
+                          if (false == finger.tool) {
+                              self._fingerId = finger.id;
+                              break;
+                          }
+                      } //for(i)
+                  }
+                  if (0 > self._fingerId) {
+                      return;
+                  }
+                  
+                  for (var i = 0; i < fingers.length; i++) {
+                      var finger = fingers[i];
+                      if (self._fingerId == finger.id) {
+                          var horz  = finger.tipPosition[0];
+                          var vert  = finger.tipPosition[1];
+                          
+                          // update
+                          var h = Math.min(200, Math.max(-200, horz))       / 200;
+                          var v = Math.min(100, Math.max(-100, vert - 180)) / 100;
+                          self.setParam(h, v);
+                          break;
+                      }
+                  } //for(i)
+              };
+              
+              // 
+              if (false == procGestures(frame.gestures)) {
+                  procFingers(frame.pointables);
+              }
+          });
+      },
+      
+      // webmusic-platform methods
+      setAudioContext: function(ac) {
+          this.super([ac]);
+          this._filterNode = this.ac.createBiquadFilter();
+          var analyser = this.ac.createAnalyser();
+          analyser.fftSize = 1024;
+          this._filterNode.connect(analyser);
+          
+          var self = this;
+          setInterval(function(){self.drawGraph(analyser)}, 100);
+          
+          this.setParam(0, 0);
+      },
+      connectToNextNode: function(nn) {
+          this._filterNode.connect(nn);
+      },
+      disconnectFromNextNode: function() {
+          this._filterNode.disconnect();
+      },
+      getInputNode: function() {
+          return this._filterNode;
+      },
+      getComponentSize: function() {
+          return this.super();
+      },
+      
+      // own methods
+      setParam: function(x, y) {
+          var freq = this._minFreq * Math.pow(10.0, Math.LOG10E * Math.log(this._maxFreq / this._minFreq) * ((x + 1.0) / 2));
+          var qval = this._minQ + (this._maxQ - this._minQ) * ((y + 1.0) / 2);
+          
+          this._filterNode.type = 2;    // bandpass
+          this._filterNode.frequency.value = freq;
+          this._filterNode.Q.value = qval;
+          
+          this.$["freq"].innerHTML = freq.toFixed(5);
+          this.$["qvalue"].innerHTML = qval.toFixed(5);
+      },
+      resetParam: function() {
+          this.setParam(0, 0);
+      },
+      drawGraph: function(analyser) {
+          var ctx = this.$["bkgrnd-canvas"].getContext("2d");
+          
+          var w = this.$["bkgrnd-canvas"].width;
+          var h = this.$["bkgrnd-canvas"].height;
+          
+          ctx.clearRect(0, 0, w, h);
+          
+          var insetX = 2;
+          var insetY = 4;
+          w -= (insetX * 2);
+          h -= (insetY * 2);
+          
+          var data = new Uint8Array(w);
+          analyser.getByteFrequencyData(data);
+          for (var i = 0; i < data.length; i ++) {
+              ctx.fillStyle = "rgb(242, 242, 248)";
+              ctx.fillRect(insetX + i, h - data[i] / 2, 1, data[i] / 2);
+          }
+          
+          var freq = parseFloat(this.$["freq"].innerHTML);
+          var qval = parseFloat(this.$["qvalue"].innerHTML);
+          
+          var cx = insetX + w * (Math.LOG10E * Math.log(freq / this._minFreq)) / (Math.LOG10E * Math.log(this._maxFreq / this._minFreq));
+          var cy = insetY + h - h * qval / (this._maxQ - this._minQ);
+          
+          ctx.beginPath();
+          ctx.arc(cx, cy, 10, 0, Math.PI*2, false);
+          ctx.closePath();
+          
+          ctx.strokeStyle = "rgba(255, 140, 0, 0.7)";
+          ctx.stroke();
+      }
+  });
+  </script>
+</polymer-element>

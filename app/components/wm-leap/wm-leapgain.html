@@ -1,0 +1,113 @@
+<!--
+Copyright (c) 2014 Yamaha Corporation. All rights reserved.
+Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
+-->
+<link rel="import" href="../wm-platform/wm-resourcemanager.html">
+<polymer-element name="wm-leapgain" extends="wm-resourcemanager" attributes="">
+  <template>
+    <link rel="stylesheet" href="../../css/reset.css">
+    <link rel="stylesheet" href="../../css/elements.css">
+    <style type="text/css">
+    .bkgrnd {
+      background-image:url("./images/leap_gain.png");
+      background-position:left 0px;
+      backrdound-repeat:no-repeat;
+      background-size:100%;
+      width:64px;
+      height:108px;
+    }
+    .volume {
+      color: #8080aa;
+      text-align: center;
+    }
+    </style>
+    <div id="bkgrnd" class="bkgrnd">
+      <BR>
+      <div id="volume" class="volume"></div>
+    </div>
+  </template>
+  <script type="text/javascript" src="../../../bower_components/leapjs/leap-0.6.1.min.js"></script>
+  <script type="text/javascript">
+  Polymer('wm-leapgain', {
+      // own properties
+      _gainNode: null,
+      _handId: -1,
+      _basisVert: 0,
+      
+      hello: function() {
+          this.super();
+      },
+      ready: function() {
+          this.hello();
+          var self=this;
+          
+          var controllerOptions = {enableGestures: true};
+          Leap.loop(controllerOptions, function(frame) {
+              
+              var procHands = function(hands) {
+                  if(0 >= hands.length) {
+                      self._handId = -1;
+                      return;
+                  }
+                  
+                  var hand = hands[0];
+                  var fingers = [];
+                  for (var j = 0; j < hand.pointables.length; j++) {
+                      var pointable = hand.pointables[j];
+                      if (!pointable.tool) {
+                          fingers.push(pointable.id);
+                      }
+                  } //for(j)
+                  if (5 != fingers.length) {
+                      self._handId = -1;
+                      return;
+                  }
+                  
+                  var horz = hand.palmPosition[0];
+                  var vert = hand.palmPosition[1];
+                  var dept = hand.palmPosition[2];
+                  
+                  if (0 > self._handId) {
+                      // first time
+                      self._handId = hand.id;
+                      self._basisVert = vert;
+                  } else if (hand.id == self._handId) {
+                      // update
+                      var diffV = vert - self._basisVert;
+                      var newGain = Math.min(1.0, Math.max(0.0, self._gainNode.gain.value + diffV / 240));
+                      self.setVolume(newGain);
+                      self._basisVert = vert;
+                  }
+              };
+              
+              procHands(frame.hands);
+          });
+      },
+      
+      setAudioContext: function(ac) {
+          this.super([ac]);
+          this._gainNode = this.ac.createGain();
+          this.setVolume(0.4);
+      },
+      connectToNextNode: function(nn){
+          this._gainNode.connect(nn);
+      },
+      disconnectFromNextNode: function(){
+          this._gainNode.disconnect();
+      },
+      getInputNode: function() {
+          return this._gainNode;
+      },
+      getComponentSize: function() {
+          return this.super();
+      },
+      setVolume: function(vol) {
+          this._gainNode.gain.value = vol;
+          this.$["volume"].innerHTML = this._gainNode.gain.value.toFixed(3);
+          
+          var idx = Math.min(12, Math.max(0, Math.round(vol * 12)));
+          this.$["bkgrnd"].style.setProperty("background-position", "left "+ (1404 - idx * 108) +"px");
+      }
+  });
+  </script>
+</polymer-element>

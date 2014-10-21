@@ -1,0 +1,207 @@
+<!--
+Copyright (c) 2014 Yamaha Corporation. All rights reserved.
+Distributed under the MIT License (license terms are at http://opensource.org/licenses/MIT).
+-->
+<link rel="import" href="../wm-platform/wm-resourcemanager.html">
+<polymer-element name="wm-leappanner" extends="wm-resourcemanager" attributes="">
+  <template>
+    <link rel="stylesheet" href="../../css/reset.css">
+    <link rel="stylesheet" href="../../css/elements.css">
+    <style type="text/css">
+      .bkgrnd {
+        background-image:url("./images/leap_panner.png");
+        background-position:left 0px;
+        backrdound-repeat:no-repeat;
+        background-size:100%;
+        width:320px;
+        height:240px;
+      }
+      .pos {
+        position:absolute; 
+        left:20px; 
+        width:280px; 
+        color: #8080aa; 
+        text-align: right; 
+      }
+      .pos#posx {
+        top:160px; 
+      }
+      .pos#posy {
+        top:180px; 
+      }
+      .pos#posz {
+        top:200px; 
+      }
+    </style>
+    <div id="bkgrnd" class="bkgrnd">
+      <canvas id="bkgrnd-canvas" width="320" height="240">
+      </canvas>
+      <div id="posx" class="pos"></div>
+      <div id="posy" class="pos"></div>
+      <div id="posz" class="pos"></div>
+    </div>
+  </template>
+  <script type="text/javascript" src="../../../bower_components/leapjs/leap-0.6.1.min.js"></script>
+  <script type="text/javascript">
+  Polymer('wm-leappanner', {
+      // own properties
+      _panNode: null,
+      _handId: -1,
+      
+      // polymer methods
+      ready: function() {
+          this.hello();
+          var self=this;
+          
+          var controllerOptions = {enableGestures: true};
+          Leap.loop(controllerOptions, function(frame) {
+              
+              // 
+              var procGestures = function(gestures) {
+                  for (var i = 0; i < gestures.length; i++) {
+                      var gesture = frame.gestures[i];
+                      if ("circle" == gesture.type) {
+                         // reset panner
+                          self.resetPosition();
+                          self._handId = -1;
+                          return true;
+                      }
+                  } //for(i)
+                  return false;
+              };
+              
+              // 
+              var procHands = function(hands) {
+                  if(0 >= hands.length) {
+                      self._handId = -1;
+                      return;
+                  }
+                  
+                  var hand = hands[0];
+                  var fingers = [];
+                  for (var j = 0; j < hand.pointables.length; j++) {
+                      var pointable = hand.pointables[j];
+                      if (!pointable.tool) {
+                          fingers.push(pointable.id);
+                      }
+                  } //for(j)
+                  if (5 != fingers.length) {
+                      self._handId = -1;
+                      return;
+                  }
+                  
+                  var horz  = hand.palmPosition[0];
+                  var vert  = hand.palmPosition[1];
+                  var depth = hand.palmPosition[2] * -1;
+                  
+                  if (0 > self._handId) {
+                      // first time
+                      self._handId = hand.id;
+                  } else if (hand.id == self._handId) {
+                      // update
+                      var h = Math.pow(Math.min(100, Math.max(-100, horz)), 3) * 0.000001;
+                      var v = Math.min(100, Math.max(-100, vert  - 180)) / 100;
+                      var d = Math.min( 80, Math.max( -80, depth +  40)) /  80;
+                      
+                      self.setPosition(h, v, d);
+                  }
+              };
+              
+              // 
+              if (false == procGestures(frame.gestures)) {
+                  procHands(frame.hands);
+              }
+          });
+      },
+      
+      // webmusic-platform methods
+      setAudioContext: function(ac) {
+          this.super([ac]);
+          this._panNode = this.ac.createPanner();
+          this._panNode.panningModel = "HRTF";
+//          this._panNode.distanceModel = "linear";
+          this.setPosition(0, 0, 0);
+      },
+      connectToNextNode: function(nn){
+          this._panNode.connect(nn);
+      },
+      disconnectFromNextNode: function(){
+          this._panNode.disconnect();
+      },
+      getInputNode: function() {
+          return this._panNode;
+      },
+      getComponentSize: function() {
+          return this.super();
+      },
+      
+      // own methods
+      setPosition: function(x, y, z) {
+          this._panNode.setPosition(x, y, z);
+          this._panNode.setVelocity(0, 0, 0);
+          
+          this.$["posx"].innerHTML = x.toFixed(5);
+          this.$["posy"].innerHTML = y.toFixed(5);
+          this.$["posz"].innerHTML = z.toFixed(5);
+          
+          this.drawPosition(x, y, z);
+      },
+      resetPosition: function() {
+          this.setPosition(0, 0, 0);
+      },
+      drawPosition: function(x, y, z) {
+          var ctx = this.$["bkgrnd-canvas"].getContext("2d");          
+          ctx.clearRect(0, 0, 320, 240);
+          
+          var farRect    = {left:92, top:66, right:226, bottom:156};
+          var nearRect   = {left:15, top: 1, right:305, bottom:195};
+          var centerRect = {left:53, top:33, right:266, bottom:176};
+          
+          var farCenter  = {x:(farRect.left  + farRect.right)  / 2, y:(farRect.top  + farRect.bottom)  / 2};
+          var nearCenter = {x:(nearRect.left + nearRect.right) / 2, y:(nearRect.top + nearRect.bottom) / 2};
+          
+          // draw min-max range
+          ctx.strokeStyle = "rgba(0, 255, 0, 0.9)";
+          ctx.strokeRect(farRect.left,  farRect.top,  farRect.right  - farRect.left,  farRect.bottom  - farRect.top);
+          ctx.strokeRect(nearRect.left, nearRect.top, nearRect.right - nearRect.left, nearRect.bottom - nearRect.top);
+          ctx.strokeStyle = "rgba(255, 0, 0, 0.9)";
+          ctx.strokeRect(centerRect.left, centerRect.top, centerRect.right - centerRect.left, centerRect.bottom - centerRect.top);
+          
+          // draw depth serface
+          // -1.0 <= z <= 1.0
+          var rect = {left:0, top:0, right:0, bottom:0};
+          var helf = 0;
+          helf = (farRect.left - nearRect.left) / 2;
+          rect.left = nearRect.left + helf + z * helf;
+          helf = (farRect.right - nearRect.right) / 2;
+          rect.right = nearRect.right + helf + z * helf;
+          helf = (farRect.top - nearRect.top) / 2;
+          rect.top = nearRect.top + helf + z * helf;
+          helf = (farRect.bottom - nearRect.bottom) / 2;
+          rect.bottom = nearRect.bottom + helf + z * helf;
+          ctx.strokeStyle = "rgba(0, 255, 0, 0.5)";
+          ctx.fillStyle = "rgba(0, 255, 0, 0.3)";
+          ctx.fillRect(rect.left, rect.top, rect.right - rect.left, rect.bottom  - rect.top);
+          
+          // draw pan circle
+          // -1.0 <= x <= 1.0
+          // -1.0 <= y <= 1.0
+          helf = (rect.right - rect.left) / 2;
+          var cx = rect.left + helf + x * helf;
+          helf = (rect.bottom - rect.top) / 2;
+          var cy = rect.top + helf + y * -1 * helf;
+          var r = helf / 20;
+          
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 0, Math.PI*2, false);
+          ctx.closePath();
+          
+          ctx.fillStyle = "rgba(255, 140, 0, 0.5)";
+          ctx.fill();
+          
+          ctx.strokeStyle = "rgba(255, 140, 0, 0.7)";
+          ctx.stroke();
+      }
+  });
+  </script>
+</polymer-element>
