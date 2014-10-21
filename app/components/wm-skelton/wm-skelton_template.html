@@ -101,7 +101,7 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
       /**
        * Call this method if the Node has UI elements(e.g. slider, knob, etc) which are required "dragging" to control them.
        *
-       * @method setIgnoreDragging([elems])
+       * @method setIgnoreDragging(elems)
        * @required No
        * @param elems {Array} (e.g. elems=[elemA, elemB, ...] (elemA, elemB must be DOM)) 
        */
@@ -121,6 +121,7 @@ Distributed under the MIT License (license terms are at http://opensource.org/li
           this.super([idName]); 
       },
       ready: function(){
+          this.hello();
       },
   });
   </script>

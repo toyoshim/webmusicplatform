@@ -132,11 +132,11 @@ Event、Methodの説明以下の通りです。
        * DOM Element を指定して、その Element 上の Drag 操作での Custom Element Node の移動が中止されます。
        * (Custom Element Node 内に Drag で操作をしたいエレメント(スライダー等)がある場合に指定してください。)
        *
-       * @method setIgnoreDragging([elems])
+       * @method setIgnoreDragging(elems)
        * @required No
        * @param elems {Array} (例：elems=[elemA, elemB, ...]) 
        */
-      setIgnoreDragging: function([elems]){
+      setIgnoreDragging: function(elems){
       },
       /**
        * 自 Custom Element Node の ID 名を Object にセットします。
@@ -149,6 +149,7 @@ Event、Methodの説明以下の通りです。
           this.super([idName]); 
       },
       ready: function(){
+          this.hello();
       },
   });
   </script>
